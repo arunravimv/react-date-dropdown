@@ -6,28 +6,37 @@ import range from "lodash/range";
 class DateSelect extends Component {
     constructor(params) {
         super(params);
-        const dateObject = this.props.initialValue && this.props.format ? moment(this.props.initialValue,this.props.format) : null;
+        const dateObject = this.props.initialValue ? moment(moment(this.props.initialValue).format(this.props.format || "YYYY-MM-DD")) : null;
         this.state = {
             selectedYear: dateObject ? dateObject.year() : null,
-            selectedMonth: dateObject ? dateObject.month() : null,
+            selectedMonth: dateObject ? dateObject.month() + 1 : null,
             selectedDayOfMonth: dateObject ? dateObject.date() : null,
-            date: "",
             daysOfMonth: [],
             months: [],
             years: []
         };
+
         this.onMonthChange = this.onMonthChange.bind(this);
         this.onYearChange = this.onYearChange.bind(this);
         this.onDayOfMonthChange = this.onDayOfMonthChange.bind(this);
         this.onChange = this.onChange.bind(this);
+        this.findNumberOfDaysInMonth = this.findNumberOfDaysInMonth.bind(this);
+
+        if (this.state.selectedYear && this.state.selectedMonth) {
+            this.findNumberOfDaysInMonth(true);
+        }
     }
 
     onChange() {
-        // this.props.onChange(date);
-        console.log("on valid change invoked");
+        const year = this.state.selectedYear;
+        const month =  this.state.selectedMonth;
+        const dayOfMonth =  this.state.selectedDayOfMonth;
+        const formattedValue = moment(`${year}-${month}-${dayOfMonth}`).format(this.props.format || "YYYY-MM-DD");
+        const value = moment(formattedValue);
+        this.props.onChange(value, formattedValue);
     }
 
-    findNumberOfDaysInMonth() {
+    findNumberOfDaysInMonth(noCallbackNeeded) {
         const _self = this;
         const MM = this.state.selectedMonth;
         const YYYY = this.state.selectedYear;
@@ -36,10 +45,10 @@ class DateSelect extends Component {
             _self.setState({daysOfMonth: range(1, numberOfDaysInMonth + 1)}, () => {
                 if (_self.state.selectedDayOfMonth && _self.state.selectedDayOfMonth > numberOfDaysInMonth) {
                     this.setState({selectedDayOfMonth: 1}, () => {
-                        _self.onChange();
+                        !noCallbackNeeded && _self.onChange();
                     })
                 } else if (_self.state.selectedDayOfMonth && _self.state.selectedDayOfMonth <= numberOfDaysInMonth) {
-                    _self.onChange();
+                    !noCallbackNeeded && _self.onChange();
                 }
             })
         }
@@ -61,26 +70,16 @@ class DateSelect extends Component {
         let startYear = this.props.startYear || moment().subtract(100, 'years').year();
         let endYear = this.props.endYear || moment().add(20, "years").year();
         let years = range(startYear, endYear);
-        let dateObject = null;
         let months = range(1, 13).map((thisMonth) => {
             return {
                 value: thisMonth,
                 label: moment(`${thisMonth}`, "MM").format("MMMM").toUpperCase()
             }
         });
-        // let endYear = moment().subtract('18',years);
-        if (!this.props.initialValue) {
-            // dateObject = moment();
-        } else {
-            dateObject = moment(this.props.initialValue)
-        }
 
         this.setState({
             months: months,
-            years: years,
-            selectedYear: dateObject ? dateObject.year() : "",
-            selectedMonth: dateObject ? dateObject.month() : "",
-            selectedDayOfMonth: dateObject ? dateObject.day() : ""
+            years: years
         })
 
     }
@@ -120,6 +119,9 @@ class DateSelect extends Component {
                                     placeholder={"YYYY"}
                                     onChange={this.onYearChange}/>
                 }
+                <h6>
+                    <span>Please select Year and Month First <br/></span>
+                </h6>
             </div>
 
         )
