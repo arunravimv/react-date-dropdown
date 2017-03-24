@@ -6,11 +6,10 @@ import range from "lodash/range";
 class DateSelect extends Component {
     constructor(params) {
         super(params);
-        const dateObject = this.props.initialValue ? moment(moment(this.props.initialValue).format(this.props.format || "YYYY-MM-DD")) : null;
         this.state = {
-            selectedYear: dateObject ? dateObject.year() : null,
-            selectedMonth: dateObject ? dateObject.month() + 1 : null,
-            selectedDayOfMonth: dateObject ? dateObject.date() : null,
+            selectedYear:  null,
+            selectedMonth: null,
+            selectedDayOfMonth: null,
             daysOfMonth: [],
             months: [],
             years: []
@@ -21,10 +20,6 @@ class DateSelect extends Component {
         this.onDayOfMonthChange = this.onDayOfMonthChange.bind(this);
         this.onChange = this.onChange.bind(this);
         this.findNumberOfDaysInMonth = this.findNumberOfDaysInMonth.bind(this);
-
-        if (this.state.selectedYear && this.state.selectedMonth) {
-            this.findNumberOfDaysInMonth(true);
-        }
     }
 
     onChange() {
@@ -67,6 +62,8 @@ class DateSelect extends Component {
     }
 
     componentWillMount() {
+        console.log(`initial value is : ${this.props.initialValue}`);
+        const dateObject = this.props.initialValue ? moment(moment(this.props.initialValue).format(this.props.format || "YYYY-MM-DD")) : null;
         let startYear = this.props.startYear || moment().subtract(100, 'years').year();
         let endYear = this.props.endYear || moment().add(20, "years").year();
         let years = range(startYear, endYear);
@@ -79,9 +76,42 @@ class DateSelect extends Component {
 
         this.setState({
             months: months,
-            years: years
-        })
+            years: years,
+            selectedYear: dateObject ? dateObject.year() : null,
+            selectedMonth: dateObject ? dateObject.month() + 1 : null,
+            selectedDayOfMonth: dateObject ? dateObject.date() : null,
+        },()=>{
+            if (this.state.selectedYear && this.state.selectedMonth) {
+                this.findNumberOfDaysInMonth(true);
+            }
+        });
 
+    }
+
+    componentWillReceiveProps(nextProps){
+        console.log(`initial value is : ${nextProps.initialValue}`);
+        const dateObject = nextProps.initialValue ? moment(moment(nextProps.initialValue).format(nextProps.format || "YYYY-MM-DD")) : null;
+        let startYear = nextProps.startYear || moment().subtract(100, 'years').year();
+        let endYear = nextProps.endYear || moment().add(20, "years").year();
+        let years = range(startYear, endYear);
+        let months = range(1, 13).map((thisMonth) => {
+            return {
+                value: thisMonth,
+                label: moment(`${thisMonth}`, "MM").format("MMMM").toUpperCase()
+            }
+        });
+
+        this.setState({
+            months: months,
+            years: years,
+            selectedYear: dateObject ? dateObject.year() : null,
+            selectedMonth: dateObject ? dateObject.month() + 1 : null,
+            selectedDayOfMonth: dateObject ? dateObject.date() : null,
+        },()=>{
+            if (this.state.selectedYear && this.state.selectedMonth) {
+                this.findNumberOfDaysInMonth(true);
+            }
+        });
     }
 
     render() {
