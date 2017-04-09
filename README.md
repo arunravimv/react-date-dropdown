@@ -7,9 +7,9 @@ This component uses moment.js
 
 
 #### Usages
-name : name of the element, startYear : Int, endYear: Int, initialValue :String, format: format String,
+name : name of the element, startRange : String, endRange: String, initialValue :String, format: format String,
 onChange : func(value, formatted value)
 
-eg : <DateSelect name="dob" startYear={moment().subtract(100, 'years').year()}
-                endYear={moment().subtract(18, 'years').year()} initialValue={this.props.dob} format={"YYYY-MM-DD"}
+eg : <DateSelect name="dob" startRange={moment().subtract(100, 'years').format("YYYY-MM-DD")}
+                endRange={moment().subtract(18, 'years').format("YYYY-MM-DD")} initialValue={this.props.dob} format={"YYYY-MM-DD"}
                 onChange={this.handleDobChange.bind(this)} />
